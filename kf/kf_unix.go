@@ -282,7 +282,7 @@ func (b *BPF) LoadTCAttachProgram(ifaceName, direction string) error {
 	} else if !clsactFound && ingressFound && htbFound {
 		if direction == models.IngressType {
 			parentHandle = htbHandle
-			} else if direction == models.EgressType {
+		} else if direction == models.EgressType {
 			parentHandle = ingressHandle
 		}
 
