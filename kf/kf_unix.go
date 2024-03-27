@@ -207,7 +207,6 @@ func (b *BPF) LoadTCAttachProgram(ifaceName, direction string) error {
 		log.Error().Err(err).Msgf("LoadTCAttachProgram - look up network iface %q", ifaceName)
 		return err
 	}
-
 	if err := b.LoadBPFProgram(ifaceName); err != nil {
 		return err
 	}
@@ -217,7 +216,6 @@ func (b *BPF) LoadTCAttachProgram(ifaceName, direction string) error {
 	if err != nil {
 		return fmt.Errorf("could not open rtnetlink socket for interface %s : %v", ifaceName, err)
 	}
-
 	clsactFound := false
 	htbFound := false
 	ingressFound := false
@@ -252,13 +250,54 @@ func (b *BPF) LoadTCAttachProgram(ifaceName, direction string) error {
 	var parent uint32
 	var filter tc.Object
 
-	if !clsactFound && !ingressFound && !htbFound {
-		if direction == models.EgressType {
+	if clsactFound {
+		if direction == models.IngressType {
 			parent = tc.HandleMinIngress
-		} else if direction == models.IngressType {
+		} else if direction == models.EgressType {
 			parent = tc.HandleMinEgress
 		}
+		progFD := uint32(bpfRootProg.FD())
+		// Netlink attribute used in the Linux kernel
+		bpfFlag := uint32(tc.BpfActDirect)
 
+		filter = tc.Object{
+			Msg: tc.Msg{
+				Family:  unix.AF_UNSPEC,
+				Ifindex: uint32(iface.Index),
+				Handle:  0,
+				Parent:  core.BuildHandle(tc.HandleRoot, parent),
+				Info:    0x300,
+			},
+			Attribute: tc.Attribute{
+				Kind: "bpf",
+				BPF: &tc.Bpf{
+					FD:    &progFD,
+					Flags: &bpfFlag,
+				},
+			},
+		}
+	} else if !clsactFound && !ingressFound && !htbFound {
+		qdisc := tc.Object{
+			Msg: tc.Msg{
+				Family:  unix.AF_UNSPEC,
+				Ifindex: uint32(iface.Index),
+				Handle:  core.BuildHandle(tc.HandleRoot, 0x0000),
+				Parent:  tc.HandleIngress,
+				Info:    0,
+			},
+			Attribute: tc.Attribute{
+				Kind: "clsact",
+			},
+		}
+		if err := tcgo.Qdisc().Add(&qdisc); err != nil {
+			log.Info().Msgf("could not assign clsact to %s : %v, its already exists", ifaceName, err)
+		}
+
+		if direction == models.IngressType {
+			parent = tc.HandleMinIngress
+		} else if direction == models.EgressType {
+			parent = tc.HandleMinEgress
+		}
 		progFD := uint32(bpfRootProg.FD())
 		// Netlink attribute used in the Linux kernel
 		bpfFlag := uint32(tc.BpfActDirect)
@@ -311,7 +350,6 @@ func (b *BPF) LoadTCAttachProgram(ifaceName, direction string) error {
 
 	// Storing Filter handle
 	b.TCFilter = tcgo.Filter()
-
 	// Attaching / Adding as filter
 	if err := b.TCFilter.Add(&filter); err != nil {
 		return fmt.Errorf("could not attach filter to interface %s for eBPF program %s : %v", ifaceName, b.Program.Name, err)
