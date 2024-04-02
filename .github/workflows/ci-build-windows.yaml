@@ -57,7 +57,7 @@ jobs:
 
       - name: Test
         run: |
-          go test -tags WINDOWS ./...
+          sudo go test -tags WINDOWS ./...
 
       - uses: dominikh/staticcheck-action@ba605356b4b29a60e87ab9404b712f3461e566dc 
         with:
