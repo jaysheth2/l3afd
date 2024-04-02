@@ -365,8 +365,6 @@ func (c *NFConfigs) VerifyNUpdateBPFProgram(bpfProg *models.BPFProgram, ifaceNam
 		// Version Change
 		if data.Program.Version != bpfProg.Version || !reflect.DeepEqual(data.Program.StartArgs, bpfProg.StartArgs) {
 			log.Info().Msgf("VerifyNUpdateBPFProgram : version update initiated - current version %s new version %s", data.Program.Version, bpfProg.Version)
-			fmt.Println("data.Program.StartArgs", data.Program.StartArgs)
-			fmt.Println("bpfProg.StartArgs", bpfProg.StartArgs)
 
 			if err := data.Stop(ifaceName, direction, c.HostConfig.BpfChainingEnabled); err != nil {
 				return fmt.Errorf("failed to stop older version of network function BPF %s iface %s direction %s version %s", bpfProg.Name, ifaceName, direction, bpfProg.Version)
@@ -659,7 +657,6 @@ func (c *NFConfigs) Deploy(ifaceName, HostName string, bpfProgs *models.BPFProgr
 		return fmt.Errorf("failed get interfaces: %v", err)
 	}
 	if _, ok := c.hostInterfaces[ifaceName]; !ok {
-		fmt.Println(".................1", c.hostInterfaces)
 		errOut := fmt.Errorf("%s interface name not found in the host", ifaceName)
 		log.Error().Err(errOut)
 		return errOut
@@ -1099,7 +1096,6 @@ func (c *NFConfigs) AddProgramsOnInterface(ifaceName, HostName string, bpfProgs 
 	}
 
 	if _, ok := c.hostInterfaces[ifaceName]; !ok {
-		fmt.Println(".................2", c.hostInterfaces)
 		errOut := fmt.Errorf("%s interface name not found in the host", ifaceName)
 		log.Error().Err(errOut)
 		return errOut
