@@ -652,9 +652,11 @@ func (c *NFConfigs) Deploy(ifaceName, HostName string, bpfProgs *models.BPFProgr
 		return errOut
 	}
 
-	err := fmt.Errorf("failed get interfaces:")
+	var err error
 	if c.hostInterfaces, err = getHostInterfaces(); err != nil {
-		return fmt.Errorf("failed get interfaces: %v", err)
+		errOut := fmt.Errorf("failed get interfaces: %v", err)
+		log.Error().Err(errOut)
+		return errOut
 	}
 	if _, ok := c.hostInterfaces[ifaceName]; !ok {
 		errOut := fmt.Errorf("%s interface name not found in the host", ifaceName)
