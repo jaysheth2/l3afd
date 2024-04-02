@@ -654,7 +654,7 @@ func (c *NFConfigs) Deploy(ifaceName, HostName string, bpfProgs *models.BPFProgr
 		return errOut
 	}
 
-	err := fmt.Errorf("failed get interfaces:", )
+	err := fmt.Errorf("failed get interfaces:")
 	if c.hostInterfaces, err = getHostInterfaces(); err != nil {
 		return fmt.Errorf("failed get interfaces: %v", err)
 	}
