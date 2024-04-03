@@ -640,7 +640,6 @@ func (c *NFConfigs) KFDetails(iface string) []*BPF {
 
 func (c *NFConfigs) Deploy(ifaceName, HostName string, bpfProgs *models.BPFPrograms) error {
 
-	fmt.Println("...........0 Deploy function")
 	if HostName != c.HostName {
 		errOut := fmt.Errorf("provided bpf programs do not belong to this host")
 		log.Error().Err(errOut)
@@ -696,7 +695,6 @@ func (c *NFConfigs) Deploy(ifaceName, HostName string, bpfProgs *models.BPFProgr
 					c.IngressTCBpfs[ifaceName] = nil
 					return fmt.Errorf("failed to chain ingress tc bpf programs: %v", err)
 				}
-				fmt.Println("Deploy and calling PushBackAndStartBPF")
 				if err := c.PushBackAndStartBPF(bpfProg, ifaceName, models.IngressType); err != nil {
 					return fmt.Errorf("failed to update BPF Program: %v", err)
 				}
@@ -1207,7 +1205,6 @@ func (c *NFConfigs) DeleteProgramsOnInterface(ifaceName, HostName string, bpfPro
 	}
 
 	if _, ok := c.hostInterfaces[ifaceName]; !ok {
-		fmt.Println(".................3", c.hostInterfaces)
 		errOut := fmt.Errorf("%s interface name not found in the host", ifaceName)
 		log.Error().Err(errOut)
 		return errOut
