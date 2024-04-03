@@ -15,7 +15,6 @@ import (
 
 	"github.com/l3af-project/l3afd/v2/config"
 	"github.com/l3af-project/l3afd/v2/models"
-	"github.com/milosgajdos/tenus"
 
 	"github.com/rs/zerolog/log"
 )
@@ -129,16 +128,6 @@ func setupBPFProgramStatusChange() {
 	valStatusChange = bpfProgsTmp
 }
 
-func setupDummyfakeif0() {
-	// Create a dummy link
-	dl, _ := tenus.NewLink("fakeif0")
-	_ = dl.SetLinkUp()
-}
-
-func removeDummyfakeif0() {
-	tenus.DeleteLink("fakeif0")
-}
-
 func TestNewNFConfigs(t *testing.T) {
 	type args struct {
 		host     string
@@ -210,7 +199,6 @@ func TestNFConfigs_Deploy(t *testing.T) {
 	setupBPFProgramData()
 	setupBPFProgramVersionChange()
 	setupBPFProgramStatusChange()
-	setupDummyfakeif0()
 
 	tests := []struct {
 		name    string
@@ -367,7 +355,6 @@ func TestNFConfigs_Deploy(t *testing.T) {
 			}
 		})
 	}
-	removeDummyfakeif0()
 }
 
 func TestNFConfigs_Close(t *testing.T) {
