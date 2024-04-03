@@ -51,7 +51,7 @@ func setupLogging() {
 	}
 	logLevel, err := zerolog.ParseLevel(logLevelStr)
 	if err != nil {
-		log.Error().Err(err).Msg("Invalid L3AF_LOG_LEVEL")
+		log.Error().Err(err).Msg("Invalid L3AF_LOG_LEVEL1")
 		return
 	}
 	zerolog.SetGlobalLevel(logLevel)
