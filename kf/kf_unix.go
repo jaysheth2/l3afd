@@ -246,7 +246,7 @@ func (b *BPF) LoadTCAttachProgram(ifaceName, direction string) error {
 				ingressHandle = qdisc.Msg.Handle
 				break
 			default:
-				log.Info("Un-supported qdisc kind for interface %s ", ifaceName)
+				log.Info().Msgf("Un-supported qdisc kind for interface %s ", ifaceName)
 			}
 		}
 	}
@@ -408,7 +408,7 @@ func (b *BPF) UnloadTCProgram(ifaceName, direction string) error {
 				ingressHandle = qdisc.Msg.Handle
 				break
 			default:
-				log.Info("qdisc kind for %s : %v", ifaceName, err)
+				log.Info().Msgf("qdisc kind for %s : %v", ifaceName, err)
 			}
 		}
 	}
