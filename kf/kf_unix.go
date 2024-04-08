@@ -236,15 +236,12 @@ func (b *BPF) LoadTCAttachProgram(ifaceName, direction string) error {
 			switch qdisc.Kind {
 			case "clsact":
 				clsactFound = true
-				break
 			case "htb":
 				htbFound = true
 				htbHandle = qdisc.Msg.Handle
-				break
 			case "ingress":
 				ingressFound = true
 				ingressHandle = qdisc.Msg.Handle
-				break
 			default:
 				log.Info().Msgf("Un-supported qdisc kind for interface %s ", ifaceName)
 			}
@@ -398,15 +395,12 @@ func (b *BPF) UnloadTCProgram(ifaceName, direction string) error {
 			switch qdisc.Kind {
 			case "clsact":
 				clsactFound = true
-				break
 			case "htb":
 				htbFound = true
 				htbHandle = qdisc.Msg.Handle
-				break
 			case "ingress":
 				ingressFound = true
 				ingressHandle = qdisc.Msg.Handle
-				break
 			default:
 				log.Info().Msgf("qdisc kind for %s : %v", ifaceName, err)
 			}
