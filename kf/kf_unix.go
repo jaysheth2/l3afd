@@ -232,16 +232,22 @@ func (b *BPF) LoadTCAttachProgram(ifaceName, direction string) error {
 		if err != nil {
 			return fmt.Errorf("could not get interface %s from id %d: %v", ifaceName, qdisc.Ifindex, err)
 		}
-		if iface.Name == ifaceName && qdisc.Kind == "clsact" {
-			clsactFound = true
-		}
-		if iface.Name == ifaceName && qdisc.Kind == "htb" {
-			htbFound = true
-			htbHandle = qdisc.Msg.Handle
-		}
-		if iface.Name == ifaceName && qdisc.Kind == "ingress" {
-			ingressFound = true
-			ingressHandle = qdisc.Msg.Handle
+		if iface.Name == ifaceName {
+			switch qdisc.Kind {
+			case "clsact":
+				clsactFound = true
+				break
+			case "htb":
+				htbFound = true
+				htbHandle = qdisc.Msg.Handle
+				break
+			case "ingress":
+				ingressFound = true
+				ingressHandle = qdisc.Msg.Handle
+				break
+			default:
+				log.Info("Un-supported qdisc kind for interface %s ", ifaceName)
+			}
 		}
 	}
 
@@ -250,15 +256,15 @@ func (b *BPF) LoadTCAttachProgram(ifaceName, direction string) error {
 	var parent uint32
 	var filter tc.Object
 
+	progFD := uint32(bpfRootProg.FD())
+	// Netlink attribute used in the Linux kernel
+	bpfFlag := uint32(tc.BpfActDirect)
 	if clsactFound {
 		if direction == models.IngressType {
 			parent = tc.HandleMinIngress
 		} else if direction == models.EgressType {
 			parent = tc.HandleMinEgress
 		}
-		progFD := uint32(bpfRootProg.FD())
-		// Netlink attribute used in the Linux kernel
-		bpfFlag := uint32(tc.BpfActDirect)
 
 		filter = tc.Object{
 			Msg: tc.Msg{
@@ -298,9 +304,6 @@ func (b *BPF) LoadTCAttachProgram(ifaceName, direction string) error {
 		} else if direction == models.EgressType {
 			parent = tc.HandleMinEgress
 		}
-		progFD := uint32(bpfRootProg.FD())
-		// Netlink attribute used in the Linux kernel
-		bpfFlag := uint32(tc.BpfActDirect)
 
 		filter = tc.Object{
 			Msg: tc.Msg{
@@ -325,10 +328,6 @@ func (b *BPF) LoadTCAttachProgram(ifaceName, direction string) error {
 			parentHandle = htbHandle
 		}
 
-		progFD := uint32(bpfRootProg.FD())
-		// Netlink attribute used in the Linux kernel
-		bpfFlag := uint32(tc.BpfActDirect)
-
 		// parentNew needs to handle of HTB and ingress 1:, and ffff:
 		filter = tc.Object{
 			Msg: tc.Msg{
@@ -346,6 +345,8 @@ func (b *BPF) LoadTCAttachProgram(ifaceName, direction string) error {
 				},
 			},
 		}
+	} else {
+		log.Info().Msgf("Unable to create qdisc object for interface %s", ifaceName)
 	}
 
 	// Storing Filter handle
@@ -393,16 +394,22 @@ func (b *BPF) UnloadTCProgram(ifaceName, direction string) error {
 		if err != nil {
 			return fmt.Errorf("could not get interface %s from id %d: %v", ifaceName, qdisc.Ifindex, err)
 		}
-		if iface.Name == ifaceName && qdisc.Kind == "clsact" {
-			clsactFound = true
-		}
-		if iface.Name == ifaceName && qdisc.Kind == "htb" {
-			htbFound = true
-			htbHandle = qdisc.Msg.Handle
-		}
-		if iface.Name == ifaceName && qdisc.Kind == "ingress" {
-			ingressFound = true
-			ingressHandle = qdisc.Msg.Handle
+		if iface.Name == ifaceName {
+			switch qdisc.Kind {
+			case "clsact":
+				clsactFound = true
+				break
+			case "htb":
+				htbFound = true
+				htbHandle = qdisc.Msg.Handle
+				break
+			case "ingress":
+				ingressFound = true
+				ingressHandle = qdisc.Msg.Handle
+				break
+			default:
+				log.Info("qdisc kind for %s : %v", ifaceName, err)
+			}
 		}
 	}
 
